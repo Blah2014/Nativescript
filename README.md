@@ -2,6 +2,7 @@
 
 ### iOS: overwrite the current delegate for the SearchBar component
 
+XML
 ```xml
 <Page xmlns="http://schemas.nativescript.org/tns.xsd" navigatingTo="navigatingTo" class="page">
 
@@ -14,4 +15,80 @@
         <SearchBar loaded="searchBarLoaded" row="0" col="0" id="searchBar" hint="Search" text="" clear="onClear" submit="onSubmit" />
     </GridLayout>
 </Page>
+```
+
+TypeScript
+```javascrit
+import { EventData } from 'data/observable';
+import { Page } from 'ui/page';
+import { HelloWorldModel } from './main-view-model';
+import {SearchBar} from "ui/search-bar";
+import {TextField} from "ui/text-field"
+import { isIOS } from "platform";
+
+
+export function navigatingTo(args: EventData) {
+
+    let page = <Page>args.object;
+
+    page.bindingContext = new HelloWorldModel();
+}
+
+export function onClear(args){
+    var search:SearchBar = <SearchBar>args.object;
+    setTimeout(()=>{
+        search.dismissSoftInput();
+    }, 0)
+}
+
+
+export function tap(args){
+var textObj:TextField = <TextField> args.object;
+console.log("tap");
+console.log(textObj);
+}
+
+export function searchBarLoaded(args){
+    var searchbar:SearchBar = <SearchBar>args.object;
+    console.log("searchbar loaded");
+
+        console.log(searchbar.ios);
+        searchbar.ios.setShowsCancelButtonAnimated(true, true)
+        let newDelegate = newUISearchBarDelegate.initWithOriginalDelegate((<any>searchbar)._delegate);
+        (<any>searchbar)._delegate=newDelegate;
+    
+
+}
+class newUISearchBarDelegate extends NSObject implements UISearchBarDelegate {
+
+    public static ObjCProtocols = [UISearchBarDelegate];
+
+    private _originalDelegate: UISearchBarDelegate;
+
+    public static initWithOriginalDelegate(originalDelegate: UISearchBarDelegate): newUISearchBarDelegate {
+        console.log("initWithOwner")
+
+        let delegate = <newUISearchBarDelegate>newUISearchBarDelegate.new();
+        delegate._originalDelegate = originalDelegate;
+    
+        console.log(delegate);
+        console.log(delegate._originalDelegate);
+        return delegate;
+    }
+
+
+    public searchBarTextDidChange(searchBar: UISearchBar, searchText: string) {
+        return this._originalDelegate.searchBarTextDidChange(searchBar, searchText);
+
+    }
+
+    public searchBarCancelButtonClicked(searchBar: UISearchBar) {
+        console.log("searchBarCancelButtonClicked");
+        this._originalDelegate.searchBarCancelButtonClicked(searchBar);
+    }
+
+    public searchBarSearchButtonClicked(searchBar: UISearchBar) {
+        this._originalDelegate.searchBarSearchButtonClicked(searchBar);
+    }
+}
 ```
