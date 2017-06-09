@@ -169,4 +169,4 @@ class newUISearchBarDelegate extends NSObject implements UISearchBarDelegate {
 }
 ```
 
-
+Bear in mind that you should also install tns-platform-declarations plugin. More about setting up those declarations could be found [here](https://www.npmjs.com/package/tns-platform-declarations).
